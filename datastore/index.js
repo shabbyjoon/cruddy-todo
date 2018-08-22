@@ -10,6 +10,10 @@ var items = {};
 exports.create = (text, callback) => {
   var id = counter.getNextUniqueId();
   items[id] = text;
+  debugger;
+  /*
+  some callback that takes err, id --> within this, invoke callback below 
+  */
   callback(null, {id: id, text: text});
 };
 
