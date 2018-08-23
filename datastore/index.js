@@ -7,14 +7,28 @@ var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
 
-exports.create = (text, callback) => {
-  var id = counter.getNextUniqueId();
-  items[id] = text;
-  debugger;
-  /*
-  some callback that takes err, id --> within this, invoke callback below 
-  */
-  callback(null, {id: id, text: text});
+exports.create = (text, addTodoCallback) => {
+  // var id = counter.getNextUniqueId();
+  // items[id] = text;
+  // debugger;
+  
+  //creatCallback that takes err, id --> within this, invoke callback below 
+  let createCallback = (err, id) => {
+    fs.writeFile(`${exports.dataDir}/${id}.txt`, `${text}`, (err) => {
+      if (err) {
+        console.log('error');
+      } else {
+        addTodoCallback(null, {id: id, text: text});
+      }
+    });
+  };
+  counter.getNextUniqueId(createCallback);
+  //call fs.writefile which uses id as filename and text as file content, accepts a callback
+  //error handling if writefile fails
+  //       else callback invokes addTodo callback 
+  //  invoke getNextUniqueId with creatCallback 
+  
+  
 };
 
 exports.readOne = (id, callback) => {
@@ -47,9 +61,9 @@ exports.update = (id, text, callback) => {
 exports.delete = (id, callback) => {
   var item = items[id];
   delete items[id];
-  if(!item) {
+  if (!item) {
     // report an error if item not found
-    callback(new Error(`No item with id: ${id}`))
+    callback(new Error(`No item with id: ${id}`));
   } else {
     callback();
   }
