@@ -13,7 +13,7 @@ exports.create = (text, addTodoCallback) => {
   // items[id] = text;
   // debugger;
 
-  //creatCallback that takes err, id --> within this, invoke callback below 
+  //creatCallback that takes err, id --> within this, invoke callback below
   let createCallback = (err, id) => {
     fs.writeFile(`${exports.dataDir}/${id}.txt`, `${text}`, (err) => {
       if (err) {
@@ -26,10 +26,8 @@ exports.create = (text, addTodoCallback) => {
   counter.getNextUniqueId(createCallback);
   //call fs.writefile which uses id as filename and text as file content, accepts a callback
   //error handling if writefile fails
-  //       else callback invokes addTodo callback 
-  //  invoke getNextUniqueId with creatCallback 
-
-
+  //       else callback invokes addTodo callback
+  //  invoke getNextUniqueId with creatCallback
 };
 
 exports.readOne = (id, callback) => {
@@ -40,7 +38,6 @@ exports.readOne = (id, callback) => {
     } else {
       callback(null, { id: id, text: data.toString() });
     }
-
   });
   // var item = items[id];
   // if (!item) {
@@ -68,23 +65,49 @@ exports.readAll = (callback) => {
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id: id, text: text });
-  }
+  // var item = items[id];
+  // if (!item) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   items[id] = text;
+  //   callback(null, { id: id, text: text });
+  // }
+  fs.readdir(`${exports.dataDir}`, (err, files) => {
+    // debugger;
+    let todos = files.map(id => id.substring(0, id.length - 4));
+    if (err || !todos.includes(id)) {
+      callback(new Error());
+    } else {
+      fs.writeFile(`${exports.dataDir}/${id}.txt`, `${text}`, (err) => {
+        if (err) {
+          callback(new Error());
+        } else {
+          callback(null, { id: id, text: text });
+        }
+      });
+    }
+  });
 };
 
 exports.delete = (id, callback) => {
-  var item = items[id];
-  delete items[id];
-  if (!item) {
-    // report an error if item not found
+  // var item = items[id];
+  // delete items[id];
+  // if (!item) {
+  //   // report an error if item not found
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   callback();
+  // }
+  if (!fs.existsSync(`${exports.dataDir}/${id}.txt`)) {
     callback(new Error(`No item with id: ${id}`));
   } else {
-    callback();
+    fs.unlink(`${exports.dataDir}/${id}.txt`, (err) => {
+      if (err) {
+        throw err;
+      }
+      callback();
+      console.log(`${exports.dataDir}/${id}.txt was deleted`);
+    });
   }
 };
 
